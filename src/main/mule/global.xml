@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd">
+	<http:listener-config name="HTTPS_Listener_config" doc:name="HTTP Listener config" doc:id="b21f1e80-d36f-4d3a-9e89-298166b3349e" >
+		<http:listener-connection protocol="HTTPS" host="0.0.0.0" port="${https_listener.port}" >
+			<tls:context >
+				<tls:key-store type="jks" path="${key_store.path}" alias="${key_store.alias}" keyPassword="${secure::key_store.key_password}" password="${secure::key_store.ks_password}" />
+			</tls:context>
+		</http:listener-connection>
+	</http:listener-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="2fa975de-be28-4aee-b5d7-1c2c7e5aac5f" file="${env}.yaml" />
+	<http:request-config name="HTTPS_Request_configuration" doc:name="HTTP Request configuration" doc:id="70678bc0-cf78-49f4-b6c4-c8a2b287c19e" >
+		<http:request-connection protocol="HTTPS" host="${https_requester.host}" />
+	</http:request-config>
+	<configuration doc:name="Configuration" doc:id="2d49f1f8-932f-434c-a37b-383fc0d66b9d" defaultErrorHandler-ref="globalError_Handler" />
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="1ab6aaaf-8aff-4f85-8272-c8ff856e79c3" file="${env}.yaml" key="${enc.key}" >
+		<secure-properties:encrypt algorithm="Blowfish" />
+	</secure-properties:config>
+	<error-handler name="globalError_Handler" doc:id="65577074-d5e7-4f6f-b5c8-94f8c495e0ce" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="b7bebc21-f31c-429c-b92a-497259c41cc2" type="ANY">
+			<ee:transform doc:name="Transform Message" doc:id="ff954ea4-25bb-4375-8edd-4cd4f576e3df" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	"message" : error.description
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		</on-error-propagate>
+	</error-handler>
+</mule>

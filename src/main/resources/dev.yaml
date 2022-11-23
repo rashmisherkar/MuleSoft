@@ -1,0 +1,22 @@
+https_listener:
+  port: "8082"
+  
+key_store:
+  path: "mule.jks"
+  alias: "mule"
+  key_password: "![FfgRxxvhlFu9V4IByJdqOw==]"
+  ks_password: "![FfgRxxvhlFu9V4IByJdqOw==]"
+    
+https_requester:
+  host: "atd2-dev-ed.my.salesforce.com"  
+  
+requester:
+  rq_path: "/services/data/v55.0/sobjects/Contact"   
+   
+access_token:
+  grant_type: "password"   
+  client_id: "3MVG9wt4IL4O5wvLtpjc3RUFKUsAy8b4Ea6D_QfLb78Kxwk.Ottk1e_.aduEh6IuSvIMgrPClzx_Mam4jFiEi"
+  client_secret: "![IPtyH3LoNFcKgcbEsSaiDl93vLKDd2G/XGvPMjJqsSU8mQPcB29Q+CdHSU7SvrdVk25yaxMR30fnS5LUXCg3Xff/AMlmX5V/]"
+  username: "revatim31@gmail.com"
+  act_password: "![KSCR2PPOznQOsNVDgeCW+y6ncNC1Oc1nCdwM2IZ1Td/585SNrewKdw==]"
+  act_path: "/services/oauth2/token"

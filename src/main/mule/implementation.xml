@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<flow name="getAllData" doc:id="a8652ca3-1b3f-437f-8501-ceea1dc95a99" >
+		<logger level="INFO" doc:name="Logger" doc:id="745c0f22-5957-4557-8605-fa80fc67b238" message="getAllData flow started"/>
+		<flow-ref doc:name="accessTokenSub_flow" doc:id="5cc5bbd2-9fea-487f-ac34-625c9adf4ec9" name="accessTokenSub_flow"/>
+		<http:request method="GET" doc:name="Request_getData" doc:id="d7445084-c16d-4156-9641-43e13555744e" config-ref="HTTPS_Request_configuration" path="${requester.rq_path}" >
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"Authorization" : "Bearer "++ vars.vAccessToken,
+	
+}]]]></http:headers>
+		</http:request>
+		<logger level="INFO" doc:name="Logger" doc:id="1e108d2d-f99e-4bc5-b336-a00b7da87f1f" message="getAllData flow ended"/>
+	</flow>
+	<sub-flow name="accessTokenSub_flow" doc:id="b97e022d-aeff-460d-a45e-4159c34bed00" >
+		<logger level="INFO" doc:name="Logger" doc:id="063e9b38-b09b-4382-8974-ed2e16682981" message="access token flow started"/>
+		<http:request method="POST" doc:name="Accerss Token" doc:id="514550a4-c8b1-4902-bc71-e1e0023ceaff" config-ref="HTTPS_Request_configuration" path="${access_token.act_path}" target="vAccessToken" targetValue="#[payload.access_token]">
+			<http:headers><![CDATA[#[output application/java
+---
+{
+	
+	"Content-Type" : "application/x-www-form-urlencoded",
+	
+}]]]></http:headers>
+			<http:query-params><![CDATA[#[output application/java
+---
+{
+	"grant_type" : p ('access_token.grant_type'),
+	"client_id": p ('access_token.client_id'),
+	 "client_secret": p ('secure::access_token.client_secret'),
+	 "username" : p ('access_token.username'),
+	 "password" : p ('secure::access_token.act_password')
+}]]]></http:query-params>
+		</http:request>
+		<logger level="INFO" doc:name="Logger" doc:id="c0eff038-e495-4136-a663-6e0c9814285c" message="access token flow ended"/>
+	</sub-flow>
+	<flow name="create_flow" doc:id="2eccffa6-a932-444e-970b-05b1184feea1" >
+		<logger level="INFO" doc:name="Logger" doc:id="430f4ff1-e5bd-44b7-a982-2e4f0417628e" message="create Data  flow started" />
+		<flow-ref doc:name="accessTokenSub_flow" doc:id="27bf9804-2742-41bf-86e7-890da964f13e" name="accessTokenSub_flow" />
+		<http:request method="POST" doc:name="Request_create" doc:id="991dbf50-46bf-41f4-b70c-28798a132ba8" config-ref="HTTPS_Request_configuration" path="${requester.rq_path}/">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"Authorization" : "Bearer "++ vars.vAccessToken,
+	"Content-Type" : "application/json"	
+}]]]></http:headers>
+		</http:request>
+		<logger level="INFO" doc:name="Logger" doc:id="1397b513-07a8-42a5-82ff-3deca43806eb" message="create data flow ended" />
+	</flow>
+	<flow name="updateData_flow" doc:id="8ec50fe0-f0ee-4f66-b9b0-fd7c49913fc2" >
+		<logger level="INFO" doc:name="Logger" doc:id="e1e3e359-4cb9-4cd5-8414-f9e30fe2c9d4" message="update data  flow started" />
+		<flow-ref doc:name="accessTokenSub_flow" doc:id="bfc78a07-54a6-4da2-bd0b-a4e2852831ef" name="accessTokenSub_flow" />
+		<http:request method="PATCH" doc:name="Request_updateData" doc:id="d1b53d05-d47a-40e3-b62f-1089c5c3fa85" config-ref="HTTPS_Request_configuration" path="${requester.rq_path}/{Id}" >
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"Authorization" : "Bearer "++ vars.vAccessToken,
+	"Content-Type" : "application/json"	
+}]]]></http:headers>
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"Id" : attributes.uriParams.Id
+}]]]></http:uri-params>
+		</http:request>
+		<logger level="INFO" doc:name="Copy_of_Logger" doc:id="4dd12429-d9c6-4eba-824c-11a93d08acfe" message="create data flow ended" />
+	</flow>
+	<flow name="deleteData_flow" doc:id="dbbf01b6-e7a6-4e33-97f8-3f84e4401982" >
+		<logger level="INFO" doc:name="Copy_of_Logger" doc:id="7d00714e-e232-4fe0-ae75-980f4d1b8999" message="delete data  flow started" />
+		<flow-ref doc:name="accessTokenSub_flow" doc:id="4cde97e1-3b81-4d33-992e-e45eb6ba751d" name="accessTokenSub_flow" />
+		<http:request method="DELETE" doc:name="Request_deleteData" doc:id="bc74db74-5cd3-492e-ae1d-c5e9c4838a61" config-ref="HTTPS_Request_configuration" path="${requester.rq_path}/{Id}" >
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"Authorization" : "Bearer "++ vars.vAccessToken,
+	
+}]]]></http:headers>
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"Id" : attributes.uriParams.Id
+}]]]></http:uri-params>
+		</http:request>
+		<logger level="INFO" doc:name="Logger" doc:id="9ecd3359-b33d-438d-8c05-cebbc1fcb2c3" message="delete data flow ended" />
+	</flow>
+	<flow name="getData_flow" doc:id="4c0f732b-f5c3-42b5-94a0-d8ddbb89d2f0" >
+		<logger level="INFO" doc:name="_Logger" doc:id="aa7c14c2-8a94-4f41-8b13-ee8c5635cef3" message="get data  flow started" />
+		<flow-ref doc:name="accessTokenSub_flow" doc:id="0a04a20f-f14c-46ae-a570-72f36a7779ad" name="accessTokenSub_flow" />
+		<http:request method="GET" doc:name="Request_getData" doc:id="1025c41a-b816-4b69-af4f-7d915e8a02bc" config-ref="HTTPS_Request_configuration" path="${requester.rq_path}/{Id}" >
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"Authorization" : "Bearer "++ vars.vAccessToken,
+	"Content-Type" : "application/json"	
+}]]]></http:headers>
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"Id" : attributes.uriParams.Id
+}]]]></http:uri-params>
+		</http:request>
+		<logger level="INFO" doc:name="Logger" doc:id="11f9976a-8b36-4116-8b31-0fd17205fd6c" message="get data flow ended" />
+	</flow>
+</mule>
